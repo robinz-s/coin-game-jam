@@ -1,12 +1,9 @@
 import zero.GameApp;
 import zero.ui.Button;
-import zero.ui.Column;
 import zero.ui.Label;
 import zero.ui.Row;
 import zero.Key;
 import zero.Color;
-import zero.ui.TextField;
-import java.util.Random;
 
 
 
@@ -16,7 +13,7 @@ public class Main extends GameApp {
     private int points;
     private Label scoreLabel;
     private Label message;
-    private Random r;
+    private boolean won;
 
 
     @Override public void settings() {
@@ -25,7 +22,6 @@ public class Main extends GameApp {
     }
 
     @Override public void setup() {
-        r = new Random();
         scoreLabel = new Label("");
         message = new Label("");
         var restartButton = new Button("Restart");
@@ -34,11 +30,11 @@ public class Main extends GameApp {
         restart();
     }
 
-    
     public void restart() {
+        won = false;
         player = new Player(40, 180);
-        coins = new Coin[] {new Coin(r.nextDouble(12, 628), r.nextDouble(42, 388), r.nextInt(1, 11)), new Coin(r.nextDouble(12, 628), r.nextDouble(42, 388), r.nextInt(1, 11)), new Coin(r.nextDouble(12, 628), r.nextDouble(42, 388), r.nextInt(1, 11))};
-        message.setText("Collect as many coins as you can. Red coins worth 5 points.");
+        coins = new Coin[] {new Coin(126,247), new Coin(389, 190), new Coin(584, 69), new Coin(234, 318)};
+        message.setText("Collect all " + coins.length + " coins.");
         points = 0;
         scoreLabel.setText("Score: 0");
         showGame();
@@ -46,6 +42,7 @@ public class Main extends GameApp {
 
 
     @Override public void update(double seconds) {
+        if (won) return;
         int horizontal = 0;
         int vertical = 0;
         if (keyDown(Key.LEFT)) horizontal--;
@@ -53,15 +50,17 @@ public class Main extends GameApp {
         if (keyDown(Key.UP)) vertical--;
         if (keyDown(Key.DOWN)) vertical++;
         player.update(horizontal, vertical, seconds, width(), height());
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < coins.length; i++) {
             Coin each = coins[i];
             if (!each.isCollected() && each.touches(player)) {
                 each.collect();
-                if (each.getType() == 10) points += 5;
-                else points++;
+                points++;
                 scoreLabel.setText("Score: " + points);
-                coins[i] = new Coin(r.nextDouble(12, 628), r.nextDouble(42, 388), r.nextInt(1, 11));
             }
+        }
+        if (points == coins.length) {
+            message.setText("You win! Click Restart.");
+            won = true;
         }
     }
 
